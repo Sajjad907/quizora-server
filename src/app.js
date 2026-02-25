@@ -3,16 +3,20 @@ const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
-const connectDB = require("./config/db");
+const app = express();
 
-// Database Connection
-connectDB();
+// Health Check (Top level to bypass other middlewares for testing)
+app.get("/api/health", (req, res) => {
+  res.json({ 
+    status: "ok", 
+    message: "Server is initializing",
+    time: new Date().toISOString()
+  });
+});
 
 const quizRoutes = require("./routes/quizRoutes");
 const notFound = require("./middlewares/notFound");
 const errorHandler = require("./middlewares/errorHandler");
-
-const app = express();
 
 // Security middleware
 // app.use(helmet());
