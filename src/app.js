@@ -41,6 +41,10 @@ app.use(express.json());
 const path = require("path");
 app.use(express.static(path.join(__dirname, "../public")));
 
+app.get("/", (req, res) => {
+  res.json({ status: "API is working", env: process.env.NODE_ENV });
+});
+
 // Routes
 app.use("/api/quizzes", quizRoutes);
 app.use("/api/analytics", require("./routes/analyticsRoutes"));
