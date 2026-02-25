@@ -16,8 +16,10 @@ exports.getQuizConfig = asyncHandler(async (req, res) => {
   let quiz;
   if (identifier && identifier.match(/^[0-9a-fA-F]{24}$/)) {
     quiz = await Quiz.findById(identifier).lean();
-  } else {
-    // If not an ID, treat as handle
+  }
+
+  // Fallback to Handle if not found by ID OR not an ID format
+  if (!quiz) {
     quiz = await Quiz.findOne({ handle: identifier, status: 'published' }).lean();
     
     // Fallback for development (if using draft)
@@ -58,7 +60,10 @@ exports.startQuizSession = asyncHandler(async (req, res) => {
   let quiz;
   if (identifier.match(/^[0-9a-fA-F]{24}$/)) {
     quiz = await Quiz.findById(identifier).lean();
-  } else {
+  }
+  
+  // Fallback to Handle if not found by ID OR not an ID format
+  if (!quiz) {
     quiz = await Quiz.findOne({ handle: identifier, status: 'published' }).lean();
   }
 
@@ -99,7 +104,10 @@ exports.submitQuiz = asyncHandler(async (req, res) => {
   let quiz;
   if (identifier.match(/^[0-9a-fA-F]{24}$/)) {
     quiz = await Quiz.findById(identifier).lean();
-  } else {
+  } 
+  
+  // Fallback to Handle if not found by ID OR not an ID format
+  if (!quiz) {
     quiz = await Quiz.findOne({ handle: identifier }).lean();
   }
 

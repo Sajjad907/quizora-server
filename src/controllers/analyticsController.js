@@ -83,7 +83,7 @@ exports.getLeads = asyncHandler(async (req, res) => {
 
   const total = await Lead.countDocuments(filter);
 
-  res.json({
+  res.json({  
     leads,
     page,
     pages: Math.ceil(total / limit),
