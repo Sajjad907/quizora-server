@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "framework": "express",
   "builds": [
     {
       "src": "api/index.js",
@@ -9,9 +8,6 @@
   ],
   "routes": [
     {
-      "handle": "filesystem"
-    },
-    {
       "src": "/assets/(.*)",
       "headers": {
         "Access-Control-Allow-Origin": "*",
@@ -19,13 +15,14 @@
       },
       "dest": "/public/assets/$1"
     },
+    { "handle": "filesystem" },
     {
       "src": "/api/(.*)",
-      "dest": "api/index.js"
+      "dest": "/api/index.js"
     },
     {
       "src": "/(.*)",
-      "dest": "api/index.js"
+      "dest": "/api/index.js"
     }
   ]
 }
