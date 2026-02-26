@@ -38,6 +38,10 @@ const path = require("path");
 app.use(express.static(path.join(__dirname, "../public")));
 
 // Routes
+app.get("/api/health", (req, res) => {
+  res.status(200).json({ status: "ok", environment: process.env.NODE_ENV });
+});
+
 app.use("/api/quizzes", quizRoutes);
 app.use("/api/analytics", require("./routes/analyticsRoutes"));
 app.use("/api/sessions", require("./routes/sessionRoutes"));
