@@ -104,6 +104,7 @@ const outcomeSchema = new mongoose.Schema({
 // --- MAIN QUIZ SCHEMA ---
 const quizSchema = new mongoose.Schema(
   {
+    ownerId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, index: true },
     storeId: { type: String, required: true, index: true }, // Creates link to Shopify Shop
     title: { type: String, required: true, trim: true },
     handle: { type: String, required: true, unique: true, lowercase: true },

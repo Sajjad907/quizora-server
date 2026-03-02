@@ -1,7 +1,9 @@
 const asyncHandler = require("../utils/asyncHandler");
 const Quiz = require("../models/Quiz");
-const Session = require("../models/session"); // Note: filename lowercase 'session.js' in your directory
+const Session = require("../models/session");
 const Lead = require("../models/Lead");
+const User = require("../models/User");
+const emailService = require("../services/emailService");
 const scoringService = require("../services/scoringService");
 
 // --- PUBLIC WIDGET API ---
@@ -74,6 +76,7 @@ exports.startQuizSession = asyncHandler(async (req, res) => {
 
   // Create Initial Session
   const session = await Session.create({
+    ownerId: quiz.ownerId, // Attach owner for analytics filtering
     quizId: quiz._id,
     storeId: quiz.storeId || "default-store",
     status: 'started',
@@ -142,6 +145,7 @@ exports.submitQuiz = asyncHandler(async (req, res) => {
   // Fallback: Create new if no session ID provided (Legacy support)
   if (!session) {
     session = await Session.create({
+      ownerId: quiz.ownerId, // Attach owner for analytics filtering
       quizId: quiz._id,
       storeId: quiz.storeId || "default-store",
       status: 'completed',
@@ -159,18 +163,54 @@ exports.submitQuiz = asyncHandler(async (req, res) => {
     });
   }
 
-  // 3. Capture Lead if Email provided (FR6)
-  if (customerInfo && customerInfo.email) {
-    await Lead.create({
-      storeId: quiz.storeId || "default-store",
-      quizId: quiz._id,
-      sessionId: session._id,
-      email: customerInfo.email,
-      firstName: customerInfo.firstName,
-      lastName: customerInfo.lastName,
-      marketingConsent: customerInfo.marketingConsent || false,
-      finalOutcomeTitle: result.outcome?.title // Track what they matched
-    });
+    // 3. Capture Lead if Email provided (FR6)
+    if (customerInfo && customerInfo.email) {
+      const outcomeTitle = result.outcome?.title || "Complete";
+      console.log(`[Lead Capture] Outcome found: ${outcomeTitle}`);
+
+      const lead = await Lead.create({
+        ownerId: quiz.ownerId, // Pass ownership from Quiz to Lead
+        storeId: quiz.storeId || "default-store",
+        quizId: quiz._id,
+        sessionId: session._id,
+        email: customerInfo.email,
+        firstName: customerInfo.firstName,
+        lastName: customerInfo.lastName,
+        marketingConsent: customerInfo.marketingConsent || false,
+        finalOutcomeTitle: outcomeTitle // Track what they matched
+      });
+
+    // --- MODULE 3: EMAIL ALERTS (ASYNC) ---
+    try {
+      const owner = await User.findById(quiz.ownerId);
+      if (owner) {
+        // Collect all unique internal recipients
+        const allRecipients = [owner.email, ...(owner.employeeEmails || [])]
+          .map(e => e.trim().toLowerCase())
+          .filter((val, idx, self) => val && self.indexOf(val) === idx);
+
+        console.log(`[Email Alert] Sending notification to: ${allRecipients.join(', ')}`);
+        
+        // 1. Alert Team (Admin + Employees)
+        emailService.sendLeadNotification({
+          to: allRecipients,
+          lead: lead,
+          quizTitle: quiz.title
+        });
+
+        // 2. Send Result to User (The Lead)
+        console.log(`[Email Alert] Sending result to user: ${lead.email}`);
+        emailService.sendLeadResult({
+          to: lead.email,
+          lead: lead,
+          quizTitle: quiz.title,
+          outcome: result.outcome || { title: "Your Analysis" },
+          products: result.aggregatedProducts || []
+        });
+      }
+    } catch (err) {
+      console.error("Email alert silent failure:", err);
+    }
   }
 
   // 4. Return Result
@@ -201,6 +241,7 @@ exports.createQuiz = asyncHandler(async (req, res) => {
   }
 
   const quiz = await Quiz.create({
+    ownerId: req.user.id,
     storeId: "default-store",
     title,
     handle,
@@ -218,8 +259,8 @@ exports.getAllQuizzes = asyncHandler(async (req, res) => {
   const limit = Number(req.query.limit) || 100;
   const skip = (page - 1) * limit;
 
-  const total = await Quiz.countDocuments({});
-  const quizzes = await Quiz.find({})
+  const total = await Quiz.countDocuments({ ownerId: req.user.id });
+  const quizzes = await Quiz.find({ ownerId: req.user.id })
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(limit);
@@ -238,12 +279,12 @@ exports.getQuizById = asyncHandler(async (req, res) => {
   
   // Try by ObjectId first, then by handle
   if (identifier && identifier.match(/^[0-9a-fA-F]{24}$/)) {
-    quiz = await Quiz.findById(identifier);
+    quiz = await Quiz.findOne({ _id: identifier, ownerId: req.user.id });
   }
   
   // Fallback: try by handle
   if (!quiz) {
-    quiz = await Quiz.findOne({ handle: identifier });
+    quiz = await Quiz.findOne({ handle: identifier, ownerId: req.user.id });
   }
 
   if (quiz) {
@@ -255,8 +296,8 @@ exports.getQuizById = asyncHandler(async (req, res) => {
 });
 
 exports.updateQuiz = asyncHandler(async (req, res) => {
-  const updatedQuiz = await Quiz.findByIdAndUpdate(
-    req.params.id, 
+  const updatedQuiz = await Quiz.findOneAndUpdate(
+    { _id: req.params.id, ownerId: req.user.id }, 
     req.body, 
     { new: true, runValidators: true }
   );
@@ -268,23 +309,23 @@ exports.updateQuiz = asyncHandler(async (req, res) => {
 });
 
 exports.deleteQuiz = asyncHandler(async (req, res) => {
-   const quiz = await Quiz.findById(req.params.id);
+   const quiz = await Quiz.findOne({ _id: req.params.id, ownerId: req.user.id });
    if(quiz) {
       await quiz.deleteOne();
       res.json({ message: "Quiz removed" });
    } else {
       res.status(404);
-      throw new Error("Quiz not found");
+      throw new Error("Quiz not found or unauthorized");
    }
 });
 
 // @desc    Get Admin Dashboard Stats
 exports.getStats = asyncHandler(async (req, res) => {
-  const totalQuizzes = await Quiz.countDocuments({});
-  const totalLeads = await Lead.countDocuments({});
-  const totalSessions = await Session.countDocuments({});
+  const totalQuizzes = await Quiz.countDocuments({ ownerId: req.user.id });
+  const totalLeads = await Lead.countDocuments({ ownerId: req.user.id });
+  const totalSessions = await Session.countDocuments({ ownerId: req.user.id }); 
   
-  const completedSessions = await Session.countDocuments({ status: 'completed' });
+  const completedSessions = await Session.countDocuments({ ownerId: req.user.id, status: 'completed' });
   const conversionRate = totalSessions > 0 ? ((completedSessions / totalSessions) * 100).toFixed(1) : 0;
 
   res.json({

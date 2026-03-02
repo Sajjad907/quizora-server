@@ -6,10 +6,11 @@ const mongoose = require("mongoose");
 
 // Helper: Build a quizId filter from query params
 const getQuizFilter = (req) => {
+  const filter = { ownerId: req.user.id };
   if (req.query.quizId && mongoose.Types.ObjectId.isValid(req.query.quizId)) {
-    return { quizId: new mongoose.Types.ObjectId(req.query.quizId) };
+    filter.quizId = new mongoose.Types.ObjectId(req.query.quizId);
   }
-  return {};
+  return filter;
 };
 
 // @desc    Get Overview Statistics (Views, Starts, Completions, Conversion)
@@ -17,7 +18,7 @@ const getQuizFilter = (req) => {
 // @access  Admin
 exports.getOverviewStats = asyncHandler(async (req, res) => {
   const filter = getQuizFilter(req);
-  const totalQuizzes = await Quiz.countDocuments({});
+  const totalQuizzes = await Quiz.countDocuments({ ownerId: req.user.id });
   const totalStarts = await Session.countDocuments(filter);
   const totalCompletions = await Session.countDocuments({ ...filter, status: 'completed' });
   const totalLeads = await Lead.countDocuments(filter);
@@ -98,7 +99,8 @@ exports.getOutcomeDistribution = asyncHandler(async (req, res) => {
   const filter = getQuizFilter(req);
   const matchStage = {
     status: 'completed',
-    "outcomeData.title": { $exists: true },
+    "outcomeData.title": { $exists
+      : true },
     ...filter
   };
 
@@ -116,7 +118,7 @@ exports.getOutcomeDistribution = asyncHandler(async (req, res) => {
 // @route   GET /api/analytics/quiz-performance
 // @access  Admin
 exports.getQuizPerformance = asyncHandler(async (req, res) => {
-  const quizzes = await Quiz.find({}).select('title status').lean();
+  const quizzes = await Quiz.find({ ownerId: req.user.id }).select('title status').lean();
   
   const performance = await Promise.all(
     quizzes.map(async (quiz) => {

@@ -133,10 +133,13 @@ exports.calculateOutcome = (quiz, submittedAnswers) => {
 
     if (qualified.length === 0) {
       debugLog.push(`\n⚠️ No qualified outcomes - using fallback`);
-      const fallbackOutcome = outcomes[0];
+      const fallbackOutcome = outcomes[0] || {
+        title: "Analysis Complete",
+        description: "Thank you for completing the quiz! We've captured your preferences."
+      };
       return {
-        outcomeId: fallbackOutcome ? (fallbackOutcome.id || fallbackOutcome._id?.toString()) : null,
-        outcome: fallbackOutcome || null,
+        outcomeId: fallbackOutcome._id?.toString() || fallbackOutcome.id || "fallback",
+        outcome: fallbackOutcome,
         aggregatedProducts: fallbackOutcome?.recommendedProducts || [],
         scores: {},
         winReason: 'Fallback (No matches)',

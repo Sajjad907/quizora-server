@@ -8,7 +8,11 @@ const {
   getQuizPerformance
 } = require("../controllers/analyticsController");
 
-// TODO: Add 'protect' middleware here once Auth is fully enforced
+const { protect } = require("../middlewares/authMiddleware");
+
+// All analytics routes require authentication
+router.use(protect);
+
 router.get("/stats", getOverviewStats);
 router.get("/funnel", getFunnelData);
 router.get("/leads", getLeads);

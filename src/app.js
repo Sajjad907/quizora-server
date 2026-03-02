@@ -4,11 +4,15 @@ const helmet = require("helmet");
 const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
 
+const cookie_parser = require("cookie-parser");
+
 const quizRoutes = require("./routes/quizRoutes");
 const notFound = require("./middlewares/notFound");
 const errorHandler = require("./middlewares/errorHandler");
 
 const app = express();
+
+app.use(cookie_parser());
 
 // Security middleware
 // app.use(helmet());
@@ -45,6 +49,7 @@ app.get("/api/health", (req, res) => {
 app.use("/api/quizzes", quizRoutes);
 app.use("/api/analytics", require("./routes/analyticsRoutes"));
 app.use("/api/sessions", require("./routes/sessionRoutes"));
+app.use("/api/auth", require("./routes/authRoutes"));
 
 // Error handling
 app.use(notFound);

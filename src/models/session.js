@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 const sessionSchema = new mongoose.Schema(
   {
+    ownerId: { type: mongoose.Schema.Types.ObjectId, ref: "User", index: true },
     quizId: { type: mongoose.Schema.Types.ObjectId, ref: "Quiz", required: true },
     storeId: { type: String, required: true }, // Important for multi-tenancy
     

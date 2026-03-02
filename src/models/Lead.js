@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 const leadSchema = new mongoose.Schema(
   {
+    ownerId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, index: true },
     storeId: { type: String, required: true, index: true },
     quizId: { type: mongoose.Schema.Types.ObjectId, ref: "Quiz", required: true },
     sessionId: { type: String, required: true }, // Link to the quiz session
