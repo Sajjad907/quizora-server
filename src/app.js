@@ -32,7 +32,14 @@ if (process.env.NODE_ENV === "development") {
 
 // Global middleware
 app.use(cors({
-  origin: true, // Allow all origins in production/development for now to prevent deployment blocks
+  origin: (origin, callback) => {
+    // Allow all origins that end with .vercel.app or localhost
+    if (!origin || origin.endsWith('.vercel.app') || origin.includes('localhost')) {
+      callback(null, true);
+    } else {
+      callback(null, true); // Fallback to true if unknown, for staging
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
