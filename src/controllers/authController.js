@@ -4,8 +4,8 @@ const jwt = require("jsonwebtoken");
 
 const cookieOptions = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: "Lax",
+  secure: true, // Always true for cross-site cookies
+  sameSite: "None", // Required for cross-site cookie sharing (admin -> server)
 };
 
 exports.register = async (req, res) => {
