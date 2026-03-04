@@ -33,11 +33,23 @@ if (process.env.NODE_ENV === "development") {
 // Global middleware
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow all origins that end with .vercel.app or localhost
-    if (!origin || origin.endsWith('.vercel.app') || origin.includes('localhost')) {
+    const allowedOrigins = [
+      'https://www.dermamage.com',
+      'https://dermamage.com',
+      'https://quizora-admin.vercel.app',
+    ];
+    // Allow: no origin (curl/postman), localhost, *.vercel.app, dermamage.com
+    if (
+      !origin ||
+      origin.includes('localhost') ||
+      origin.endsWith('.vercel.app') ||
+      origin.endsWith('dermamage.com') ||
+      allowedOrigins.includes(origin)
+    ) {
       callback(null, true);
     } else {
-      callback(null, true); // Fallback to true if unknown, for staging
+      // Fallback: allow anyway (staging/preview URLs)
+      callback(null, true);
     }
   },
   credentials: true,
