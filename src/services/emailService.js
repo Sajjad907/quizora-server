@@ -108,12 +108,28 @@ exports.sendLeadResult = async ({ to, lead, quizTitle, outcome, products }) => {
   try {
     const productsHtml = products && products.length > 0 
       ? products.map(p => `
-          <!-- Product Tile -->
-          <div style="display: inline-block; width: 250px; margin: 10px; background-color: #ffffff; border-radius: 20px; border: 1px solid #f1f5f9; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); text-align: left; vertical-align: top;">
-            ${p.imageUrl ? `<img src="${p.imageUrl}" alt="${p.title}" style="width: 100%; height: 180px; object-fit: cover; display: block;" />` : ''}
-            <div style="padding: 20px;">
-              <h4 style="margin: 0 0 8px 0; color: #1e293b; font-size: 16px; font-weight: 800; height: 40px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">${p.title}</h4>
-              <div style="color: #6366f1; font-weight: 800; font-size: 18px;">${p.price || 'View Details'}</div>
+          <!-- Elevated Product Card -->
+          <div style="display: inline-block; width: 46%; min-width: 240px; max-width: 260px; margin: 10px 1%; background: #ffffff; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01); border: 1px solid rgba(99,102,241,0.1); text-align: center; vertical-align: top; transition: transform 0.3s ease;">
+            
+            <!-- Image Header (Premium Contain) -->
+            <div style="background-color: #f8fafc; padding: 20px; height: 180px; position: relative; border-bottom: 1px solid #f1f5f9;">
+                ${p.imageUrl ? `<img src="${p.imageUrl}" alt="${p.title}" style="width: 100%; height: 100%; object-fit: contain; display: block; mix-blend-mode: multiply;" />` : `<div style="color: #cbd5e1; font-size: 40px; line-height: 180px;">📦</div>`}
+            </div>
+
+            <!-- Product Info Box -->
+            <div style="padding: 24px 20px;">
+              <h4 style="margin: 0 0 12px 0; color: #1e293b; font-size: 15px; font-weight: 800; line-height: 1.4; height: 42px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; letter-spacing: -0.2px;">
+                ${p.title}
+              </h4>
+              
+              <div style="color: #1e293b; font-weight: 900; font-size: 20px; margin-bottom: 20px;">
+                ${p.price || 'View Details'}
+              </div>
+
+              <!-- Action Button -->
+              <a href="${p.shopUrl || 'https://www.dermamage.com'}" style="display: block; width: 100%; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #ffffff; text-decoration: none; padding: 14px 0; border-radius: 12px; font-weight: 800; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                Shop Now
+              </a>
             </div>
           </div>
         `).join('')
