@@ -38,10 +38,11 @@ app.use(cors({
       'https://dermamage.com',
       'https://quizora-admin.vercel.app',
     ];
-    // Allow: no origin (curl/postman), localhost, *.vercel.app, dermamage.com
+    // Allow: no origin (curl/postman), localhost, 127.0.0.1, *.vercel.app, dermamage.com
     if (
       !origin ||
       origin.includes('localhost') ||
+      origin.includes('127.0.0.1') ||
       origin.endsWith('.vercel.app') ||
       origin.endsWith('dermamage.com') ||
       allowedOrigins.includes(origin)
