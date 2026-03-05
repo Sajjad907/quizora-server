@@ -176,7 +176,7 @@ exports.calculateOutcome = (quiz, submittedAnswers) => {
     const aggregatedProducts = [];
     const seenProductIds = new Set();
 
-    // Add products from winning outcome first
+    // Add products from winning outcome only
     if (winningOutcome.recommendedProducts) {
       winningOutcome.recommendedProducts.forEach(p => {
         const pId = p.productId || p.title;
@@ -186,19 +186,6 @@ exports.calculateOutcome = (quiz, submittedAnswers) => {
         }
       });
     }
-
-    // Optionally add products from other high-scoring outcomes
-    qualified.slice(1, 3).forEach(s => {
-      if (s.outcome.recommendedProducts && s.score > 0) {
-        s.outcome.recommendedProducts.forEach(p => {
-          const pId = p.productId || p.title;
-          if (!seenProductIds.has(pId) && aggregatedProducts.length < 10) {
-            aggregatedProducts.push(p);
-            seenProductIds.add(pId);
-          }
-        });
-      }
-    });
 
     debugLog.push(`Total Products: ${aggregatedProducts.length}`);
 
