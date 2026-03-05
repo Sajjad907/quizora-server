@@ -143,11 +143,29 @@ const quizData = {
       description: 'Don\'t overthink it — pick the one that bothers you most daily.',
       required: true,
       options: [
-        { id: 'q2_a', text: '🌑 Dark spots & Uneven skin tone', tags: ['pigmentation', 'brightening'], weights: [{ outcomeId: 'out_glow', points: 4 }, { outcomeId: 'out_dry', points: 1 }] },
-        { id: 'q2_b', text: '💥 Acne, Breakouts & Blackheads', tags: ['acne', 'oily', 'pores'], weights: [{ outcomeId: 'out_oily', points: 5 }] },
+        { 
+          id: 'q2_a', 
+          text: '🌑 Dark spots & Uneven skin tone', 
+          tags: ['pigmentation', 'brightening'], 
+          weights: [{ outcomeId: 'out_glow', points: 4 }, { outcomeId: 'out_dry', points: 1 }],
+          recommendedProducts: [{ ...PRODUCTS.vitaminCSerum, reason: 'Recommended specifically to target your dark spots and restore an even, radiant complexion.' }]
+        },
+        { 
+          id: 'q2_b', 
+          text: '💥 Acne, Breakouts & Blackheads', 
+          tags: ['acne', 'oily', 'pores'], 
+          weights: [{ outcomeId: 'out_oily', points: 5 }],
+          recommendedProducts: [{ ...PRODUCTS.nzSerum, reason: 'Essential for you: Niacinamide targets active breakouts and balances oil immediately.' }]
+        },
         { id: 'q2_c', text: '🏜️ Dryness & Flakiness', tags: ['dry', 'dryness', 'hydration'], weights: [{ outcomeId: 'out_dry', points: 5 }] },
         { id: 'q2_d', text: '🔍 Large Pores & Excess Shine', tags: ['oily', 'pores', 'combination'], weights: [{ outcomeId: 'out_oily', points: 3 }, { outcomeId: 'out_combo', points: 3 }] },
-        { id: 'q2_e', text: '😔 Dull, Tired-looking Skin', tags: ['dull', 'brightening', 'glow'], weights: [{ outcomeId: 'out_glow', points: 5 }] },
+        { 
+          id: 'q2_e', 
+          text: '😔 Dull, Tired-looking Skin', 
+          tags: ['dull', 'brightening', 'glow'], 
+          weights: [{ outcomeId: 'out_glow', points: 5 }],
+          recommendedProducts: [{ ...PRODUCTS.glowCream, reason: 'This specific cream is selected to revive your tired skin and bring back your natural brightness.' }]
+        },
         { id: 'q2_f', text: '🌡️ Redness & Irritation', tags: ['sensitive', 'calming'], weights: [{ outcomeId: 'out_sensitive', points: 5 }] },
       ],
     },
@@ -175,7 +193,13 @@ const quizData = {
         { id: 'q4_a', text: '✅ Yes, every single day', tags: ['sun-aware'], weights: [{ outcomeId: 'out_glow', points: 1 }] },
         { id: 'q4_b', text: '🌤️ Sometimes, only when going out', tags: ['sun-unaware'], weights: [{ outcomeId: 'out_oily', points: 1 }, { outcomeId: 'out_combo', points: 1 }] },
         { id: 'q4_c', text: '❌ No, I usually skip it', tags: ['sun-unaware', 'pigmentation'], weights: [{ outcomeId: 'out_glow', points: 2 }, { outcomeId: 'out_dry', points: 1 }] },
-        { id: 'q4_d', text: '🔍 I want to start but haven\'t found one I like', tags: ['oily', 'combination', 'sun-unaware'], weights: [{ outcomeId: 'out_oily', points: 2 }, { outcomeId: 'out_combo', points: 2 }] },
+        { 
+          id: 'q4_d', 
+          text: '🔍 I want to start but haven\'t found one I like', 
+          tags: ['oily', 'combination', 'sun-unaware'], 
+          weights: [{ outcomeId: 'out_oily', points: 2 }, { outcomeId: 'out_combo', points: 2 }],
+          recommendedProducts: [{ ...PRODUCTS.ultraSunblock, reason: 'Since you are looking for a sunscreen you like, this sebum-control formula is perfect for your specific profile.' }]
+        },
       ],
     },
     {
@@ -198,8 +222,20 @@ const quizData = {
       description: 'This is your skin goal — what matters most to you in the next 30 days.',
       required: true,
       options: [
-        { id: 'q6_a', text: '✨ Brighter, more even skin tone', tags: ['brightening', 'glow'], weights: [{ outcomeId: 'out_glow', points: 5 }] },
-        { id: 'q6_b', text: '🧊 Clear, acne-free & oil-controlled skin', tags: ['acne', 'oily'], weights: [{ outcomeId: 'out_oily', points: 5 }] },
+        { 
+          id: 'q6_a', 
+          text: '✨ Brighter, more even skin tone', 
+          tags: ['brightening', 'glow'], 
+          weights: [{ outcomeId: 'out_glow', points: 5 }],
+          recommendedProducts: [{ ...PRODUCTS.vitaminCSerum, reason: 'Your goal is brightness: High-potency Vitamin C is the #1 item to achieve this results.' }]
+        },
+        { 
+          id: 'q6_b', 
+          text: '🧊 Clear, acne-free & oil-controlled skin', 
+          tags: ['acne', 'oily'], 
+          weights: [{ outcomeId: 'out_oily', points: 5 }],
+          recommendedProducts: [{ ...PRODUCTS.seboclar, reason: 'To achieve clear, acne-free skin, this purifying cleanser is non-negotiable for your routine.' }]
+        },
         { id: 'q6_c', text: '💦 Deep hydration & plump, soft skin', tags: ['dry', 'hydration'], weights: [{ outcomeId: 'out_dry', points: 5 }] },
         { id: 'q6_d', text: '🌿 Calm, soothed & irritation-free skin', tags: ['sensitive', 'calming'], weights: [{ outcomeId: 'out_sensitive', points: 5 }] },
         { id: 'q6_e', text: '🏆 Balanced skin – not too oily, not too dry', tags: ['combination', 'balanced'], weights: [{ outcomeId: 'out_combo', points: 5 }] },

@@ -49,6 +49,14 @@ const optionSchema = new mongoose.Schema({
   weights: [{
     outcomeId: { type: String },
     points: { type: Number, default: 1 }
+  }],
+  recommendedProducts: [{
+    productId: { type: String },
+    handle: { type: String },
+    title: { type: String },
+    imageUrl: { type: String },
+    price: { type: String },
+    reason: { type: String }
   }]
 });
 

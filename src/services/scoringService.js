@@ -172,14 +172,32 @@ exports.calculateOutcome = (quiz, submittedAnswers) => {
     debugLog.push(`Score: ${winner.score} | Priority: ${winner.priority}`);
     debugLog.push(`Reason: ${winReason}`);
 
-    // --- STEP 6: Aggregate Products ---
+    // --- STEP 6: Aggregate Products (Truly Dynamic) ---
     const aggregatedProducts = [];
     const seenProductIds = new Set();
 
-    // Add products from winning outcome only
+    // 1. Add Answer-Specific Products (Add-ons based on answers)
+    submittedAnswers.forEach(ans => {
+      const question = quiz.questions.find(q => String(q.id || q._id) === String(ans.questionId));
+      if (!question) return;
+
+      const option = question.options?.find(opt => String(opt.id || opt._id) === String(ans.optionId));
+      if (option && option.recommendedProducts && option.recommendedProducts.length > 0) {
+        option.recommendedProducts.forEach(p => {
+          const pId = p.productId || p.handle || p.title;
+          if (!seenProductIds.has(pId)) {
+            aggregatedProducts.push(p);
+            seenProductIds.add(pId);
+            debugLog.push(`+ Dynamic Add-on Added: "${p.title}" (from answer "${option.text}")`);
+          }
+        });
+      }
+    });
+
+    // 2. Add Base Routine Products (from winning outcome)
     if (winningOutcome.recommendedProducts) {
       winningOutcome.recommendedProducts.forEach(p => {
-        const pId = p.productId || p.title;
+        const pId = p.productId || p.handle || p.title;
         if (!seenProductIds.has(pId)) {
           aggregatedProducts.push(p);
           seenProductIds.add(pId);
