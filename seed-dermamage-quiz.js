@@ -19,7 +19,7 @@ const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/quizdb';
 
 // This is the Owner/Admin user that owns the quiz.
 // Use the real ObjectId from your MongoDB Users collection.
-const OWNER_ID = process.env.OWNER_ID || '69a0947e4fc4f39f4ee1117e';
+const OWNER_ID = process.env.OWNER_ID || '69a860a9dbea4d63c3c28a11';
 
 // The quiz handle used in the widget embed code
 const QUIZ_HANDLE = 'dermamage-skin-quiz';
