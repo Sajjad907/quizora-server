@@ -25,21 +25,8 @@ app.use(
   })
 );
 
-// Content Security Policy to allow Shopify embedding
-app.use((req, res, next) => {
-  const shop = req.query.shop;
-  const frameAncestors = ["https://admin.shopify.com", "https://*.myshopify.com"];
-  
-  if (shop) {
-    frameAncestors.push(`https://${shop}`);
-  }
-
-  res.setHeader(
-    "Content-Security-Policy",
-    `frame-ancestors ${frameAncestors.join(" ")};`
-  );
-  next();
-});
+// Content Security Policy removed temporarily to allow all iframes (simplifies Shopify Editor embedding)
+// app.use((req, res, next) => { ... });
 
 // Logging
 if (process.env.NODE_ENV === "development") {
