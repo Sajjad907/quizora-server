@@ -25,6 +25,22 @@ app.use(
   })
 );
 
+// Content Security Policy to allow Shopify embedding
+app.use((req, res, next) => {
+  const shop = req.query.shop;
+  const frameAncestors = ["https://admin.shopify.com", "https://*.myshopify.com"];
+  
+  if (shop) {
+    frameAncestors.push(`https://${shop}`);
+  }
+
+  res.setHeader(
+    "Content-Security-Policy",
+    `frame-ancestors ${frameAncestors.join(" ")};`
+  );
+  next();
+});
+
 // Logging
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
@@ -70,6 +86,11 @@ app.use("/api/quizzes", quizRoutes);
 app.use("/api/analytics", require("./routes/analyticsRoutes"));
 app.use("/api/sessions", require("./routes/sessionRoutes"));
 app.use("/api/auth", require("./routes/authRoutes"));
+
+// SPA Fallback for Widget Frontend (React Router)
+app.get(/^(?!\/api).*$/, (req, res) => {
+  res.sendFile(path.join(__dirname, "../public/index.html"));
+});
 
 // Error handling
 app.use(notFound);
