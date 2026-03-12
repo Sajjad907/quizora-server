@@ -9,7 +9,7 @@
   "rewrites": [
     {
       "source": "/assets/(.*)",
-      "destination": "/public/assets/$1"
+      "destination": "/assets/$1"
     },
     {
       "source": "/api/(.*)",
@@ -17,7 +17,7 @@
     },
     {
       "source": "/(.*)",
-      "destination": "api/index.js"
+      "destination": "/index.html"
     }
   ],
   "headers": [
