@@ -66,7 +66,15 @@ app.use(express.static(path.join(__dirname, "../public")));
 
 // Routes
 app.get("/api/health", (req, res) => {
-  res.status(200).json({ status: "ok", environment: process.env.NODE_ENV });
+  const mongoose = require("mongoose");
+  const dbStatus = mongoose.connection.readyState === 1 ? "Connected" : "Disconnected";
+  
+  res.status(200).json({ 
+    status: "ok", 
+    engine: "Operational",
+    database: dbStatus,
+    environment: process.env.NODE_ENV 
+  });
 });
 
 app.use("/api/quizzes", quizRoutes);
