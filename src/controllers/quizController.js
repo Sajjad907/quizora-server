@@ -334,11 +334,6 @@ exports.getStats = asyncHandler(async (req, res) => {
     totalLeads,
     totalSessions,
     conversionRate: `${conversionRate}%`,
-    trends: {
-      quizzes: "+1 this week",
-      leads: "+12% total",
-      sessions: "+5% organic",
-      conversion: "2.1% growth"
-    }
+    trends: {} // Removing dummy placeholders
   });
 });
