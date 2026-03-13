@@ -17,16 +17,16 @@ exports.getQuizConfig = asyncHandler(async (req, res) => {
   // Try finding by ID first, then Handle
   let quiz;
   if (identifier && identifier.match(/^[0-9a-fA-F]{24}$/)) {
-    quiz = await Quiz.findById(identifier).lean();
+    quiz = await Quiz.findById(identifier).populate('ownerId', 'subscriptionStatus').lean();
   }
 
   // Fallback to Handle if not found by ID OR not an ID format
   if (!quiz) {
-    quiz = await Quiz.findOne({ handle: identifier, status: 'published' }).lean();
+    quiz = await Quiz.findOne({ handle: identifier, status: 'published' }).populate('ownerId', 'subscriptionStatus').lean();
     
     // Fallback for development (if using draft)
     if (!quiz && process.env.NODE_ENV === 'development') {
-      quiz = await Quiz.findOne({ handle: identifier }).lean();
+      quiz = await Quiz.findOne({ handle: identifier }).populate('ownerId', 'subscriptionStatus').lean();
     }
   }
 
@@ -47,7 +47,8 @@ exports.getQuizConfig = asyncHandler(async (req, res) => {
     theme: quiz.theme,
     startScreen: quiz.startScreen,
     questions: questionsWithIds,
-    settings: quiz.settings
+    settings: quiz.settings,
+    merchantStatus: quiz.ownerId?.subscriptionStatus || 'ACTIVE'
   });
 });
 
