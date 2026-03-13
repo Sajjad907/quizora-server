@@ -7,6 +7,8 @@ const { protect } = require("../middlewares/authMiddleware");
 
 router.post("/register", authController.register);
 router.post("/login", authController.login);
+router.post("/shopify-login", authController.shopifyLogin);
+router.post("/sync-user", authController.syncUser);
 router.post("/logout", authController.logout);
 router.post("/refresh", authController.refresh);
 router.get("/me", protect, authController.me);

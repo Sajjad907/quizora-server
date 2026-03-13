@@ -105,6 +105,89 @@ exports.login = async (req, res) => {
   }
 };
 
+exports.shopifyLogin = async (req, res) => {
+  try {
+    const { shop } = req.body;
+
+    if (!shop) {
+      return res.status(400).json({ status: "fail", message: "Shop domain is required" });
+    }
+
+    // Find user associated with this shop
+    let user = await User.findOne({ shopifyShop: shop });
+
+    if (!user) {
+      // In a real production app, we might create the user here if they came from a verified Shopify request
+      return res.status(401).json({ status: "fail", message: "No account found for this store" });
+    }
+
+    // Generate tokens
+    const accessToken = signAccessToken(user._id);
+    const refreshToken = signRefreshToken(user._id);
+
+    user.refreshToken = refreshToken;
+    await user.save({ validateBeforeSave: false });
+
+    // Set cookies
+    res.cookie("accessToken", accessToken, {
+      ...cookieOptions,
+      maxAge: 15 * 60 * 1000,
+    });
+
+    res.cookie("refreshToken", refreshToken, {
+      ...cookieOptions,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    res.status(200).json({
+      status: "success",
+      user: {
+        id: user._id,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ status: "error", message: err.message });
+  }
+};
+
+exports.syncUser = async (req, res) => {
+  try {
+    const { shop, plan, status, updatedAt } = req.body;
+
+    if (!shop) {
+      return res.status(400).json({ status: "fail", message: "Shop domain is required" });
+    }
+
+    // Upsert user based on shopifyShop
+    let user = await User.findOne({ shopifyShop: shop });
+
+    if (!user) {
+      // Create new merchant user
+      user = await User.create({
+        email: `${shop.split('.')[0]}@quizora.merchant`,
+        password: Math.random().toString(36).slice(-12) + "!", // Secure placeholder
+        shopifyShop: shop,
+        role: "admin",
+        plan: plan || "Free",
+        subscriptionStatus: status || "ACTIVE",
+        planUpdatedAt: updatedAt ? new Date(Number(updatedAt)) : new Date()
+      });
+    } else {
+      // Update existing
+      user.plan = plan || user.plan;
+      user.subscriptionStatus = status || user.subscriptionStatus;
+      user.planUpdatedAt = updatedAt ? new Date(Number(updatedAt)) : user.planUpdatedAt;
+      await user.save({ validateBeforeSave: false });
+    }
+
+    res.status(200).json({ status: "success", userId: user._id });
+  } catch (err) {
+    res.status(500).json({ status: "error", message: err.message });
+  }
+};
+
 exports.logout = async (req, res) => {
   try {
     const { refreshToken } = req.cookies;
