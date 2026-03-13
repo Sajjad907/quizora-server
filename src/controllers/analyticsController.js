@@ -2,6 +2,7 @@ const asyncHandler = require("../utils/asyncHandler");
 const Quiz = require("../models/Quiz");
 const Session = require("../models/session");
 const Lead = require("../models/Lead");
+const User = require("../models/User");
 const mongoose = require("mongoose");
 
 // Helper: Build a quizId filter from query params
@@ -142,4 +143,42 @@ exports.getQuizPerformance = asyncHandler(async (req, res) => {
   // Sort by sessions desc
   performance.sort((a, b) => b.sessions - a.sessions);
   res.json(performance);
+});
+
+// @desc    Get stats by Shopify shop domain
+// @route   GET /api/analytics/shopify-stats?shop=domain
+// @access  Internal/Shopify
+exports.getMerchantStatsByShop = asyncHandler(async (req, res) => {
+  const { shop } = req.query;
+  if (!shop) return res.status(400).json({ status: "fail", message: "Shop domain is required" });
+
+  const user = await User.findOne({ shopifyShop: shop }).lean();
+  if (!user) return res.status(404).json({ status: "fail", message: "Merchant not found" });
+
+  const ownerId = user._id;
+  const totalQuizzes = await Quiz.countDocuments({ ownerId });
+  const totalStarts = await Session.countDocuments({ ownerId });
+  const totalCompletions = await Session.countDocuments({ ownerId, status: 'completed' });
+  const totalLeads = await Lead.countDocuments({ ownerId });
+  const conversionRate = totalStarts > 0
+    ? ((totalCompletions / totalStarts) * 100).toFixed(1)
+    : 0;
+
+  // Also get recent quizzes
+  const recentQuizzes = await Quiz.find({ ownerId })
+    .sort({ updatedAt: -1 })
+    .limit(3)
+    .select('title status handle updatedAt')
+    .lean();
+
+  res.json({
+    totalQuizzes,
+    totalStarts,
+    totalCompletions,
+    totalLeads,
+    conversionRate: parseFloat(conversionRate),
+    plan: user.plan,
+    status: user.subscriptionStatus,
+    recentQuizzes
+  });
 });

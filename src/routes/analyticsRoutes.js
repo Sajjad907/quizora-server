@@ -5,12 +5,16 @@ const {
   getFunnelData,
   getLeads,
   getOutcomeDistribution,
-  getQuizPerformance
+  getQuizPerformance,
+  getMerchantStatsByShop
 } = require("../controllers/analyticsController");
 
 const { protect } = require("../middlewares/authMiddleware");
 
-// All analytics routes require authentication
+// Public-ish analytics for Shopify app
+router.get("/shopify-stats", getMerchantStatsByShop);
+
+// All other analytics routes require authentication
 router.use(protect);
 
 router.get("/stats", getOverviewStats);
