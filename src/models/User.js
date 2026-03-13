@@ -32,6 +32,25 @@ const userSchema = new mongoose.Schema(
       type: String,
       select: false,
     },
+    // Shopify Specific Data
+    shopifyShop: {
+      type: String,
+      unique: true,
+      sparse: true, // Allow traditional users without shopify association
+      trim: true,
+      lowercase: true,
+    },
+    plan: {
+      type: String,
+      default: "Free",
+    },
+    subscriptionStatus: {
+      type: String,
+      default: "ACTIVE", // e.g., 'ACTIVE', 'CANCELLED', 'EXPIRED'
+    },
+    planUpdatedAt: {
+      type: Date,
+    },
   },
   { timestamps: true }
 );
